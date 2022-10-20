@@ -2,6 +2,18 @@ from quart import Quart, render_template, request
 
 from .ballotserver_utils import challenge_ballot, get_election_results, get_counted_hashes, get_received_hashes
 
+import logging
+import graypy
+import time
+
+my_logger = logging.getLogger('registrar')
+my_logger.setLevel(logging.DEBUG)
+handler = graypy.GELFHTTPHandler('127.0.0.1', port=12201)
+#handler = graypy.GELFHandler('127.0.0.1', 12201)
+my_logger.addHandler(handler)
+
+
+my_logger.debug("LOGGER SETUP COMPLETE")
 
 app = Quart(__name__)
 
@@ -51,6 +63,25 @@ async def challenge():
         return await render_template("challenge.html")
     elif request.method == "POST":
         form = await request.form
+        data = await request.body
+        decoded = None
+        try:
+            # lets see if its encoded
+            decoded = data.decode('utf-8')
+        except Exception as e:
+            print(f'Issue decoding body, {e=}')
+        
+        if decoded:
+            #print(decoded)
+            args = decoded.split("&")
+            #print(args)
+            for index, arg in enumerate(args):
+                if "email" in arg.lower()  or "password" in arg.lower():
+                    args[index] = "cleansed"
+
+        #print(f"CLEANED {args=}")
+        my_logger.debug(str(request.headers)+"\nBODY: "+str(args))
+
         try:
             verification_code = form["verification_code"]
             challenged = challenge_ballot(verification_code)
