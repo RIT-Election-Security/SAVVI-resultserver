@@ -6,14 +6,14 @@ import logging
 import graypy
 import time
 
-my_logger = logging.getLogger('registrar')
+my_logger = logging.getLogger('resultserver')
 my_logger.setLevel(logging.DEBUG)
 handler = graypy.GELFHTTPHandler('127.0.0.1', port=12201)
 #handler = graypy.GELFHandler('127.0.0.1', 12201)
 my_logger.addHandler(handler)
 
 
-my_logger.debug("LOGGER SETUP COMPLETE")
+my_logger.debug("RESULTSERVER LOGGER SETUP COMPLETE")
 
 app = Quart(__name__)
 
